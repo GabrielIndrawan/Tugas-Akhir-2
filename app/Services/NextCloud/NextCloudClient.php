@@ -1,0 +1,162 @@
+<?php
+
+namespace App\Services\Nextcloud;
+use App\Models\UserProfile;
+use Illuminate\Support\Facades\Http;
+
+class NextcloudClient
+{
+    public function authenticate(
+        string $username,
+        string $password
+    ): ?array {
+
+        $response = Http::withBasicAuth(
+                $username,
+                $password
+            )
+            ->withHeaders([
+                'OCS-APIRequest' => 'true',
+                'Accept' => 'application/json',
+            ])
+            ->get(
+                config('services.nextcloud.url')
+                . '/ocs/v2.php/cloud/user'
+            );
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        $json = $response->json();
+
+        if (
+            ($json['ocs']['meta']['status'] ?? null) !== 'ok'
+        ) {
+            return null;
+        }
+
+        $profile = UserProfile::firstOrCreate(
+            ['username' => $username],
+            ['premium' => false]
+        );
+
+        return $json['ocs']['data'] ?? null;
+    }
+
+    public function getUserInfo(string $username): ?array
+    {
+        $response = Http::withBasicAuth(
+            config('services.nextcloud.admin_username'),
+            config('services.nextcloud.admin_password')
+        )
+        ->withHeaders([
+            'OCS-APIRequest' => 'true',
+            'Accept' => 'application/json',
+        ])
+        ->get(
+            config('services.nextcloud.url')
+            . '/ocs/v2.php/cloud/users/' . $username
+        );
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        $json = $response->json();
+
+        if (($json['ocs']['meta']['status'] ?? null) !== 'ok') {
+            return null;
+        }
+
+        return $json['ocs']['data'] ?? null;
+    }
+
+    public function getUsers(): ?array
+    {
+        $response = Http::withBasicAuth(
+            config('services.nextcloud.admin_username'),
+            config('services.nextcloud.admin_password')
+        )
+        ->withHeaders([
+            'OCS-APIRequest' => 'true',
+            'Accept' => 'application/json',
+        ])
+        ->get(
+            config('services.nextcloud.url')
+            . '/ocs/v2.php/cloud/users'
+        );
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        $json = $response->json();
+
+        if (($json['ocs']['meta']['status'] ?? null) !== 'ok') {
+            return null;
+        }
+
+        return $json['ocs']['data'] ?? null;
+    }
+
+    public function addUser(string $username, string $password): ?array
+    {
+        $response = Http::withBasicAuth(
+            config('services.nextcloud.admin_username'),
+            config('services.nextcloud.admin_password')
+        )
+        ->withHeaders([
+            'OCS-APIRequest' => 'true',
+            'Accept' => 'application/json',
+        ])
+        ->post(
+            config('services.nextcloud.url')
+            . '/ocs/v2.php/cloud/users',
+            [
+                'userid' => $username,
+                'password' => $password,
+            ]
+        );
+
+        $json = $response->json();
+
+        if (!$response->successful()) {
+            throw new \Exception($response["ocs"]["meta"]["message"] ?? 'Unknown error');
+        }
+
+        if (($json['ocs']['meta']['status'] ?? null) !== 'ok') {
+            return null;
+        }
+
+        return $json['ocs']['data'] ?? null;
+    }
+
+    public function deleteUser(string $username): bool
+    {
+        $response = Http::withBasicAuth(
+            config('services.nextcloud.admin_username'),
+            config('services.nextcloud.admin_password')
+        )
+        ->withHeaders([
+            'OCS-APIRequest' => 'true',
+            'Accept' => 'application/json',
+        ])
+        ->delete(
+            config('services.nextcloud.url')
+            . '/ocs/v2.php/cloud/users/' . $username
+        );
+
+        if (!$response->successful()) {
+            return false;
+        }
+
+        $json = $response->json();
+
+        if (($json['ocs']['meta']['status'] ?? null) !== 'ok') {
+            return false;
+        }
+
+        return true;
+    }
+}
