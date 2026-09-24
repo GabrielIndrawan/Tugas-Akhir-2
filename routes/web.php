@@ -23,13 +23,13 @@ Route::get('/test/auth', function () {
 })->middleware('auth');
 
 Route::middleware(['auth'])->group(function (){
+    Route::resource("/users",UsersController::class);
     Route::get("/dashboard", [HomeController::class, "index"])->name("dashboard");
     Route::get("/storage", [StoragePageController::class, "index"])->name("storage");
     Route::get("/logout",[AuthenticatedSessionController::class,"destroy"])->name("logout");
     Route::middleware(CheckUserRole::class)->group(function (){
         Route::get("/admin/dashboard", [AdminHomeController::class, "index"])->name("dashboard-admin");
         Route::get("/admin/profile", [ProfileController::class, "edit"])->name("profile-admin");
-        Route::resource("/admin/users",UsersController::class);
     });
 });
 

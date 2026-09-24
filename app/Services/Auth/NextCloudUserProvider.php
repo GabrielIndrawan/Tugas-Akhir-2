@@ -58,6 +58,12 @@ class NextcloudUserProvider implements UserProvider
         );
     }
 
+    public function getUserProfile(string $username){
+        $result = $this->nextcloud->getUserInfo($username);
+
+        return $result;
+    }
+
     public function getAllUserwithProfileData(){
         $results = $this->nextcloud->getUsers();
         $users = $results["users"];

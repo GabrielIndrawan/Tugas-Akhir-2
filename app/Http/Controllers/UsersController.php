@@ -19,6 +19,7 @@ class UsersController extends Controller
     public function index()
     {
         //
+        return view("app.admin.profile");
     }
 
     /**
@@ -58,6 +59,9 @@ class UsersController extends Controller
     public function edit(string $id)
     {
         //
+        $user = $this->nextcloudUserProvider->getUserProfile($id);
+
+        return view("app.admin.edit_user", ["user" => $user]);
     }
 
     /**
@@ -66,6 +70,7 @@ class UsersController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        
     }
 
     /**
@@ -73,8 +78,9 @@ class UsersController extends Controller
      */
     public function destroy(string $id)
     {
-        //
-        $this->nextcloudUserProvider->deleteUser($id);
 
+        $this->nextcloudUserProvider->deleteUser($id);
+        
+        return redirect()->back()->with('success', 'User deleted successfully.');
     }
 }

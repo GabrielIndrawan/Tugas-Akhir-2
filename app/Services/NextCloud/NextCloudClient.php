@@ -116,6 +116,7 @@ class NextcloudClient
             [
                 'userid' => $username,
                 'password' => $password,
+                'quota' => '10GB',
             ]
         );
 
@@ -145,6 +146,38 @@ class NextcloudClient
         ->delete(
             config('services.nextcloud.url')
             . '/ocs/v2.php/cloud/users/' . $username
+        );
+
+        if (!$response->successful()) {
+            return false;
+        }
+
+        $json = $response->json();
+
+        if (($json['ocs']['meta']['status'] ?? null) !== 'ok') {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function updateUser(string $username, string $property, string $value): bool{
+        
+        $response = Http::withBasicAuth(
+            config('services.nextcloud.admin_username'),
+            config('services.nextcloud.admin_password')
+        )
+        ->withHeaders([
+            'OCS-APIRequest' => 'true',
+            'Accept' => 'application/json',
+        ])
+        ->put(
+            config('services.nextcloud.url')
+            . '/ocs/v2.php/cloud/users/' . $username,
+            [
+                'key' => $property,
+                'value' => $value,
+            ]
         );
 
         if (!$response->successful()) {

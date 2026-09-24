@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
+use App\Models\Role;
 
 
 class NextCloudUser implements Authenticatable
@@ -10,6 +11,7 @@ class NextCloudUser implements Authenticatable
 
     public function __construct(
         public string $id,
+        public Role $role = Role::User,
         public bool $premium = false,
         public int $storageUsed = 0,
         public int $storageQuota = 0,
