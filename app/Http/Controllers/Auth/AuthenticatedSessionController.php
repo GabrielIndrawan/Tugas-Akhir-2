@@ -7,6 +7,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use App\Models\UserProfile;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -29,9 +31,11 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         if(Auth::user()->id === "admin"){
+            UserProfile::where('username', Auth::user()->id)->update(['is_active' => true]);
             return redirect()->intended(route('dashboard-admin'));
         }
 
+        UserProfile::where('username', Auth::user()->id)->update(['is_active' => true]);
         return redirect()->intended(route('dashboard'));
     }
 
@@ -41,6 +45,9 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
+
+        UserProfile::where('username', Auth::user()->id)->update(['is_active' => false]);
+        Cache::forget("all_users_data");
 
         $request->session()->invalidate();
 

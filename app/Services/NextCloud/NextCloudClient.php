@@ -38,8 +38,15 @@ class NextcloudClient
 
         $profile = UserProfile::firstOrCreate(
             ['username' => $username],
-            ['premium' => false]
+            [
+                'premium' => false,
+                'current_quota' => 10,
+                'is_active'=>true
+            ],
         );
+
+        $appPassword = $this->getUserAppPassword($username, $password);
+        session(['nextcloud_app_password' => $appPassword]);
 
         return $json['ocs']['data'] ?? null;
     }
@@ -70,6 +77,30 @@ class NextcloudClient
         }
 
         return $json['ocs']['data'] ?? null;
+    }
+
+    public function getUserAppPassword(string $username, string $password): ?string
+    {
+        $response = Http::withBasicAuth(
+            $username,
+            $password
+        )
+        ->withHeaders([
+            'OCS-APIRequest' => 'true',
+            'Accept' => 'application/json',
+        ])
+        ->get(
+            config('services.nextcloud.url')
+            . '/ocs/v2.php/core/getapppassword'
+        );
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        $result = $response->json();
+
+        return $result["ocs"]["data"]["apppassword"] ?? null;
     }
 
     public function getUsers(): ?array
@@ -177,6 +208,38 @@ class NextcloudClient
             [
                 'key' => $property,
                 'value' => $value,
+            ]
+        );
+
+        if (!$response->successful()) {
+            return false;
+        }
+
+        $json = $response->json();
+
+        if (($json['ocs']['meta']['status'] ?? null) !== 'ok') {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function addUserQuota(string $username, string $property, int $initialValue, int $value): bool{
+        
+        $response = Http::withBasicAuth(
+            config('services.nextcloud.admin_username'),
+            config('services.nextcloud.admin_password')
+        )
+        ->withHeaders([
+            'OCS-APIRequest' => 'true',
+            'Accept' => 'application/json',
+        ])
+        ->put(
+            config('services.nextcloud.url')
+            . '/ocs/v2.php/cloud/users/' . $username,
+            [
+                'key' => $property,
+                'value' => (string)($initialValue + $value) . "GB",
             ]
         );
 

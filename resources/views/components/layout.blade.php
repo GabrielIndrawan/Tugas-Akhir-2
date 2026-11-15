@@ -22,8 +22,9 @@
                     <div class="flex flex-row md:flex-col items-center overflow-x-auto md:overflow-x-visible">
                         <x-nav.sidebar-button href="{{Auth::user()->id === 'admin' ? route('dashboard-admin') : route('dashboard')}}" :isActive="$activeButton === 'homePage'">Home Page</x-nav.sidebar-button>
                         <x-nav.sidebar-button href="{{ route('storage') }}" :isActive="$activeButton === 'storage'">Storage</x-nav.sidebar-button>
-                        <x-nav.sidebar-button :isActive="$activeButton === 'settings'" class="{{ Auth::user()->id === 'admin' ? 'hidden' : '' }}">Settings</x-nav.sidebar-button>
+                        <x-nav.sidebar-button class="{{ Auth::user()->id === 'admin' ? '' : 'hidden' }}" href="{{ route('subscription') }}" :isActive="$activeButton === 'subscription'">Subscription</x-nav.sidebar-button>
                         <x-nav.sidebar-button href="{{ route('users.show', Auth::id()) }}" :isActive="$activeButton === 'profile'">Profile/Info</x-nav.sidebar-button>
+                        <x-nav.sidebar-button class="{{ Auth::user()->id !== 'admin' ? '' : 'hidden' }}" href="{{ route('history') }}" :isActive="$activeButton === 'history'">History</x-nav.sidebar-button>
                         <a class="border md:w-full hover:bg-gray-200 md:hover:bg-gray-100 transtion duration-300 px-3 min-h-[4vh] md:py-5 font-bold text-red-500 text-sm" href="{{ route("logout") }}">Logout</a>
                     </div>
                 </nav>

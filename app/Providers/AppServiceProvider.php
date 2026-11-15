@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\Auth\NextCloudUserProvider;
 use App\Services\Nextcloud\NextCloudClient;
+use App\Services\NextCloud\NextCloudWebDav;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
@@ -22,7 +23,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Auth::provider('nextcloud', fn ($app, array $config) => new NextcloudUserProvider(
-            $app->make(NextcloudClient::class)
+            $app->make(NextcloudClient::class),
+            $app->make(NextCloudWebDav:: class)
         ));
     }
 }

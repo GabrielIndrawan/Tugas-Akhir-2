@@ -11,11 +11,12 @@ class NextCloudUser implements Authenticatable
 
     public function __construct(
         public string $id,
-        public Role $role = Role::User,
         public bool $premium = false,
+        public bool $isActive = false,
         public int $storageUsed = 0,
         public int $storageQuota = 0,
         public int $quotaLeft = 0,
+        public string $appPassword = "",
         public string $displayName = "",
         public? string $email = null,
     ){}

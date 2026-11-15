@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\NextCloudUser;
+use App\Models\UserProfile;
 use App\Services\Auth\NextcloudUserProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class UsersController extends Controller
 {
@@ -39,6 +43,12 @@ class UsersController extends Controller
         //
         try{
             $this->nextcloudUserProvider->createUser($request->input("username"),$request->input("password"));
+
+            Cache::forget("all_users_data");
+
+            if(auth()->user() === null){
+                return redirect()->route('login');
+            }
             return redirect()->back()->with('success', 'User created successfully.');
         }catch(\Exception $e){
             return redirect()->back()->with('error', 'Failed to create user: ' . $e->getMessage());
@@ -51,6 +61,10 @@ class UsersController extends Controller
     public function show(string $id)
     {
         //
+        if(auth()->user()->id !== "admin"){
+            return view("app.user.profile", ["user" => auth()->user()]);
+        }
+        return view("app.admin.profile");
     }
 
     /**
@@ -70,7 +84,38 @@ class UsersController extends Controller
     public function update(Request $request, string $id)
     {
         //
-        
+        if(auth()->user()->id !== "admin"){
+           $oldUser = UserProfile::where('username', $id)->first();
+           try{ 
+
+                $this->nextcloudUserProvider->updateUserUsername($id, $request->input("username"));
+                $user = $this->nextcloudUserProvider->createNextcloudUserObject($request->input("username"), $oldUser);
+
+                Cache::forget("all_users_data");
+                Auth::login($user);
+
+                return redirect()->back()->with('success', 'Username updated successfully.');
+            }catch(\Exception $e){
+                return redirect()->back()->with('error', 'Failed to update username: ' . $e->getMessage());
+            }
+        }else{
+            try{ 
+
+                $this->nextcloudUserProvider->updateUserUsername($id, $request->input("username"));
+                Cache::forget("all_users_data");
+
+                return redirect()->back()->with('success', 'Username updated successfully.');
+            }catch(\Exception $e){
+                return redirect()->back()->with('error', 'Failed to update username: ' . $e->getMessage());
+            }
+        }
+
+        try{
+            $this->nextcloudUserProvider->updateUserUsername($id, $request->input("username"));
+            return redirect()->back()->with('success', 'Username updated successfully.');
+        }catch(\Exception $e){
+            return redirect()->back()->with('error', 'Failed to update username: ' . $e->getMessage());
+        }
     }
 
     /**

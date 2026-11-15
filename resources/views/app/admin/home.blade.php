@@ -11,7 +11,7 @@
         </a>
     </div>
     <h2 class="text-lg font-bold mt-4">Daftar Pengguna</h2>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto overflow-y-auto">
         <table class="min-w-full bg-white border rounded-lg mt-2">
             <thead>
                 <tr>
@@ -21,6 +21,7 @@
                     <th class="py-2 px-4 border-b">Free Quota</th>
                     <th class="py-2 px-4 border-b">Total Quota</th>
                     <th class="py-2 px-4 border-b">Premium</th>
+                    <th class="py-2 px-4 border-b">Is Online</th>
                     <th class="py-2 px-4 border-b">Edit User</th>
                     <th class="py-2 px-4 border-b">Delete User</th>
                 </tr>
@@ -34,6 +35,7 @@
                     <td class="py-2 px-4 border-b">{{ convertRawValueFromByte($user->quotaLeft ) }}</td>
                     <td class="py-2 px-4 border-b">{{ convertRawValueFromByte($user->storageQuota ) }}</td>
                     <td class="py-2 px-4 border-b">{{ $user->premium ? 'Yes' : 'No' }}</td>
+                    <td class="py-2 px-4 border-b">{{ $user->isActive ? 'Online' : 'Offline'}}</td>
                     <td>
                         @if( $user->id === 'admin')
                             <span class="text-gray-500 select-none">Cannot edit admin credentials</span>

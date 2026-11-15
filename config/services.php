@@ -39,6 +39,12 @@ return [
         'url' => env("NEXTCLOUD_URL"),
         'admin_username' => env("NEXTCLOUD_USERNAME"),
         'admin_password' => env("NEXTCLOUD_PASSWORD"),
+    ],
+
+    "stripe" => [
+        "key" => env("STRIPE_KEY"),
+        "secret" => env("STRIPE_SECRET"),
+        "webhook_secret" => env("STRIPE_WEBHOOK_SECRET"),
     ]
 
 ];

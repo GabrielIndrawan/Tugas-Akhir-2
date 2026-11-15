@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('username')->unique();
             $table->boolean('premium')->default(false);
+            $table->integer('current_quota')->default(10);
             $table->timestamps();
         });
     }
